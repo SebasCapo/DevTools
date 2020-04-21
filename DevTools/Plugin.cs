@@ -29,12 +29,12 @@ namespace DevTools {
         }
 
         public override void OnReload() {
-        } //Andrés Calamaro
+        }
 
         public void ReloadConfig() {
             needPermission = Config.GetBool("dt_permissionsneed", false);
         }
 
-        public override string getName { get; } = "DevTools 1.0.0 - SebasCapo";
+        public override string getName { get; } = "DevTools 1.0.11 - SebasCapo";
     }
 }

@@ -30,11 +30,11 @@ namespace DevTools {
                         + "\n \"tpdoor <doorname> <xScale> <yScale> <zScale>\""
                         + "\n \"nuketimer <seconds>\""
                         + "\n \"randompos <RoleType>\""
-                        + "\n \"startdecontamination\""
+                        + "\n \"forcedecontamination\""
                         + "\n \"gotoroom <roomname>\""
                         + "\n \"testbadge <player> <text>\""
                         + "\n \"resetbadge <player>\""
-                        + "\n \"info <arg>\" (Type \"info\" for more help on those commands!)"
+                        + "\n \"info <arg>\" (Type \"info\" for more help on every possible argument!)"
                         );
                     return;
                 } else if(args[0].EqualsIgnoreCase("randompos")) {
@@ -121,14 +121,16 @@ namespace DevTools {
                         return;
                     }
                     AlphaWarheadController.Host.timeToDetonation = float.Parse(args[1]);
+                    ev.Sender.RAMessage($"<color=green>Time until detonation has been set to {AlphaWarheadController.Host.timeToDetonation}.</color>");
                     return;
-                } else if(args[0].EqualsIgnoreCase("startdecontamination")) {
+                } else if(args[0].EqualsIgnoreCase("forcedecontamination")) {
                     ev.Allow = false;
-                    if(!HasPermission(sender, "startdecontamination")) {
+                    if(!HasPermission(sender, "forcedecontamination")) {
                         ev.Sender.RAMessage("<color=red>Access denied.</color>");
                         return;
                     }
                     Map.StartDecontamination();
+                    ev.Sender.RAMessage($"<color=green>Decontamination has been forced.</color>");
                     return;
                 } else if(args[0].EqualsIgnoreCase("gotoroom")) {
                     ev.Allow = false;
@@ -140,8 +142,10 @@ namespace DevTools {
                         ev.Sender.RAMessage(CorrectUsage("gotoroom <room_name>"));
                         return;
                     }
-                    foreach(Room r in Map.Rooms) if(r.Name.ToLower().EqualsIgnoreCase(args[2])) sender.SetPosition(r.Position.x, r.Position.y + 1, r.Position.z);
-
+                    string roomName = ev.Command.Substring(ev.Command.LastIndexOf(args[0]));
+                    foreach(Room r in Map.Rooms) if(r.Name.ToLower().EqualsIgnoreCase(roomName)) sender.SetPosition(r.Position.x, r.Position.y + 1, r.Position.z);
+                    ev.Sender.RAMessage($"<color=green>You've been teleported to: {roomName}.</color>");
+                    return;
                 } else if(args[0].EqualsIgnoreCase("testbadge")) {
                     ev.Allow = false;
                     if(!HasPermission(sender, "testbadge")) {
@@ -152,7 +156,7 @@ namespace DevTools {
                         ev.Sender.RAMessage(CorrectUsage("testbadge <player> <text>"));
                         return;
                     }
-
+                    
                     ReferenceHub p = Player.GetPlayer(args[1]);
 
                     p?.serverRoles.TargetSetHiddenRole(sender.serverRoles.connectionToClient, args[2]);
@@ -185,7 +189,7 @@ namespace DevTools {
                     }
                     if(args.Length >= 2) {
                         if(args[1].EqualsIgnoreCase("pos")) {
-                            if(!HasPermission(sender, "pos")) {
+                            if(!HasPermission(sender, "info.pos")) {
                                 ev.Sender.RAMessage("<color=red>Access denied.</color>");
                                 return;
                             }
@@ -194,11 +198,12 @@ namespace DevTools {
                                 t += player.GetNickname() + " - ";
                             ev.Sender.RAMessage($"<color=green>----------</color>" +
                                 $"\nPos: <b>X{sender.GetPosition().x} Y{sender.GetPosition().y} Z{sender.GetPosition().z}</b>" +
+                                $"\nRotation: <b>{sender.GetRotationVector()}</b>" +
                                 $"\nRoom: <b>{sender.GetCurrentRoom()?.Name} -- {sender.GetCurrentRoom()?.Zone}</b>" +
                                 $"\nTry using \"info room\" for more information.");
                             return;
                         } else if(args[1].EqualsIgnoreCase("room")) {
-                            if(!HasPermission(sender, "room")) {
+                            if(!HasPermission(sender, "info.room")) {
                                 ev.Sender.RAMessage("<color=red>Access denied.</color>");
                                 return;
                             }
@@ -207,11 +212,11 @@ namespace DevTools {
                                 t += player.GetNickname() + " - ";
                             ev.Sender.RAMessage($"<color=green>----------</color>" +
                                 $"\nRoom: <b>{sender.GetCurrentRoom().Name} -- {sender.GetCurrentRoom().Zone}</b>" +
-                                $"\nRoom Info: <b>X{sender.GetCurrentRoom().Position.x} Y{sender.GetCurrentRoom().Position.y} Z{sender.GetCurrentRoom().Position.z}</b>" +
+                                $"\nRoom Info: <b>X: {sender.GetCurrentRoom().Position.x} Y: {sender.GetCurrentRoom().Position.y} Z: {sender.GetCurrentRoom().Position.z}</b>" +
                                 $"\nRoom Players: <b>({sender.GetCurrentRoom().GetHubs().Count()}) {t}</b>");
                             return;
                         } else if(args[1].EqualsIgnoreCase("class")) {
-                            if(!HasPermission(sender, "class")) {
+                            if(!HasPermission(sender, "info.class")) {
                                 ev.Sender.RAMessage("<color=red>Access denied.</color>");
                                 return;
                             }
@@ -220,7 +225,7 @@ namespace DevTools {
                                 $"\nTeam: <b>{sender.GetTeam()}</b>");
                             return;
                         } else if(args[1].EqualsIgnoreCase("rooms")) {
-                            if(!HasPermission(sender, "rooms")) {
+                            if(!HasPermission(sender, "info.rooms")) {
                                 ev.Sender.RAMessage("<color=red>Access denied.</color>");
                                 return;
                             }
@@ -229,23 +234,25 @@ namespace DevTools {
                             ev.Sender.RAMessage(names);
                             return;
                         } else if(args[1].EqualsIgnoreCase("version")) {
-                            if(!HasPermission(sender, "version")) {
+                            if(!HasPermission(sender, "info.version")) {
                                 ev.Sender.RAMessage("<color=red>Access denied.</color>");
                                 return;
                             }
                             ev.Sender.RAMessage("You're currently using " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
                             return;
                         } else if(args[1].EqualsIgnoreCase("alldoors")) {
-                            if(!HasPermission(sender, "alldoors")) {
+                            if(!HasPermission(sender, "info.alldoors")) {
                                 ev.Sender.RAMessage("<color=red>Access denied.</color>");
                                 return;
                             }
                             ev.Sender.RAMessage("<b>List of Doors found:</b>");
+                            string t = "";
                             foreach(Door d in UnityEngine.Object.FindObjectsOfType<Door>().ToList())
-                                ev.Sender.RAMessage($"{d.DoorName}   -   Position: {d.transform.position.x} {d.transform.position.y} {d.transform.position.z}");
+                                t += $"\n{d.DoorName}   -   <color=green>Position: X: {d.transform.position.x} Y: {d.transform.position.y} Z: {d.transform.position.z}</color>";
+                                ev.Sender.RAMessage(t);
                             return;
                         } else if(args[1].EqualsIgnoreCase("getobjects")) {
-                            if(!HasPermission(sender, "getobjects")) {
+                            if(!HasPermission(sender, "info.getobjects")) {
                                 ev.Sender.RAMessage("<color=red>Access denied.</color>");
                                 return;
                             }
@@ -253,26 +260,38 @@ namespace DevTools {
                                 ev.Sender.RAMessage(CorrectUsage("info getobjects <range>"));
                                 return;
                             }
-                            if(float.TryParse(args[1], out float range)) {
+                            if(float.TryParse(args[2], out float range)) {
                                 ev.Sender.RAMessage("<b>List of GameObjects found:</b>");
+                                string txt = "";
                                 foreach(Collider c in Physics.OverlapSphere(sender.GetPosition(), range))
-                                    ev.Sender.RAMessage(c.gameObject.name);
+                                    txt += $"\nFound: {c.gameObject.name}     (X: {c.transform.position.x} Y: {c.transform.position.y} Z: {c.transform.position.z})";
+                                    ev.Sender.RAMessage(txt);
                                 return;
                             } else {
                                 ev.Sender.RAMessage(CorrectUsage("info getobjects <range>"));
                                 return;
                             }
                         } else if(args[1].EqualsIgnoreCase("reload")) {
-                            if(!HasPermission(sender, "reload")) {
+                            if(!HasPermission(sender, "info.reload")) {
                                 ev.Sender.RAMessage("<color=red>Access denied.</color>");
                                 return;
                             }
                             ev.Sender.RAMessage("<b>Config variables reloaded!</b>");
                             plugin.ReloadConfig();
                             return;
+                        } else if(args[1].EqualsIgnoreCase("roles")) {
+                            if(!HasPermission(sender, "info.roles")) {
+                                ev.Sender.RAMessage("<color=red>Access denied.</color>");
+                                return;
+                            }
+                            string a = "";
+                            foreach(RoleType i in Extensions.GetValues<RoleType>())
+                                a += $" - {i.ToString()} ({(int) i})";
+                            ev.Sender.RAMessage($"Here's a list with every RoleType: \n{a}");
+                            return;
                         }
-                    }
-                    ev.Sender.RAMessage("<color=red>Allowed arguments: pos - class - version - rooms - alldoors - getobjects - reload</color>");
+                    } 
+                    ev.Sender.RAMessage("<color=red>Try typing \"info\" alongside any of these arguments: pos - room - class - version - rooms - alldoors - getobjects - roles - reload</color>");
                 }
                 return;
             } catch(Exception e) {
@@ -281,8 +300,8 @@ namespace DevTools {
         }
 
         public bool HasPermission(ReferenceHub hub, string perm) {
-            if(hub.CheckPermission("dt.*") || hub.CheckPermission("dt." + perm)) return true;
-            return false;
+            if(plugin.needPermission && (hub.CheckPermission("dt.*") || hub.CheckPermission("dt." + perm))) return true;
+            else return !plugin.needPermission && hub.serverRoles.RemoteAdmin;
         }
 
         public string CorrectUsage( string correctUsage ) {
