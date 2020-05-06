@@ -1,7 +1,7 @@
 # DevTools
 This plugin gives both developers and administrators some really nice features that should help you configure or develop most if not every plugin.
 
-For example, if you're having trouble with [CommonUtils](https://github.com/KadeDev/Common-Utils/ "CommonUtils")' configuration variables and wanna know each class ID, you can use `info roles`. Or you wanna know where center of a certain room is for a plugin you're making? Just use `info room` and/or `info gotoroom <RoomName>` to get it!
+For example, if you're having trouble with [CommonUtils](https://github.com/KadeDev/Common-Utils/ "CommonUtils")' configuration variables and wanna know each class ID, you can use `info roles`. Or you wanna know where center of a certain room is for a plugin you're making? Just use `info room` and/or `gotoroom <RoomName>` to get it!
 
 ### Installation
 As with any EXILED plugin, you must place the DevTools.dll file inside of your "%appdata%/Roaming/Plugins" folder.
